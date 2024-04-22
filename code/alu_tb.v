@@ -21,6 +21,7 @@
 
 module alu_tb;
     // Inputs
+    reg Clk;          // Clock input
     reg [7:0] A;
     reg [7:0] B;
     reg [3:0] Sel;
@@ -31,6 +32,7 @@ module alu_tb;
 
     // Instantiate the ALU module
     alu uut (
+        .Clk(Clk),
         .A(A),
         .B(B),
         .Sel(Sel),
@@ -38,8 +40,12 @@ module alu_tb;
         .Zero(Zero)
     );
 
+    // Clock generation
+    always #5 Clk = ~Clk; // Clock period of 10 time units
+
     // Test stimulus
     initial begin
+        Clk = 0;
         // Test case 1: ADD operation
         A = 8'b01010101;
         B = 8'b10101010;
@@ -96,19 +102,32 @@ module alu_tb;
         #10; // Allow some time for the output to stabilize
         $display("Test case 4 - OR: Result = %b, Zero = %b", Out, Zero);
         
-// Test case 1: Control signal is not a valid operation (all bits set to 0)
+        A = 8'b11110111;
+        B = 8'b10101010;
+        Sel = 4'b0010;
+        #10; // Allow some time for the output to stabilize
+        $display("Test case 3 - ADD (one negative number): Result = %b, Zero = %b", Out, Zero);
+
+        // Test case 4: ADD operation with both negative numbers
+        A = 8'b11110111;
+        B = 8'b11111101;
+        Sel = 4'b0010;
+        #10; // Allow some time for the output to stabilize
+        $display("Test case 4 - ADD (both negative numbers): Result = %b, Zero = %b", Out, Zero);
+
+        // Test case 5: SUB operation with both negative numbers
+        A = 8'b11110111;
+        B = 8'b11111101;
+        Sel = 4'b0110;
+        #10; // Allow some time for the output to stabilize
+        $display("Test case 5 - SUB (both negative numbers): Result = %b, Zero = %b", Out, Zero);
+
+    // Test case 1: Control signal is not a valid operation (all bits set to 0)
         A = 8'b10101010;
         B = 8'b01010101;
-        Sel = 4'b0000; // Not a valid operation
+        Sel = 4'b1111; 
         #10; // Allow some time for the output to stabilize
         $display("Test case 1: Control signal not valid - Result = %b, Zero = %b", Out, Zero);
-
-        // Test case 2: Control signal is not a valid operation (all bits set to 1)
-        A = 8'b10101010;
-        B = 8'b01010101;
-        Sel = 4'b1111; // Not a valid operation
-        #10; // Allow some time for the output to stabilize
-        $display("Test case 2: Control signal not valid - Result = %b, Zero = %b", Out, Zero);
 
         $finish;
     end
